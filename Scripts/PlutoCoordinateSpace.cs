@@ -25,6 +25,9 @@ public class PlutoCoordinateSpace : MonoBehaviour
     {
         while (true)
         {
+            if (destroyCancellationToken.IsCancellationRequested)
+                return;
+
             try
             {
                 var conversationData = await PlutoAPIs.Client.ConversationGetAsync();
