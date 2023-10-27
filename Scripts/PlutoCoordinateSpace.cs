@@ -1,7 +1,5 @@
 using Pluto.APIs.Client;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -10,6 +8,7 @@ public class PlutoCoordinateSpace : MonoBehaviour
     public PlutoAPIs PlutoAPIs;
     public GameObject RotationPivot;
     public GameObject PositionPivot;
+    private bool isQuitting = false;
 
     public Transform Anchor
     {
@@ -21,12 +20,23 @@ public class PlutoCoordinateSpace : MonoBehaviour
         KeepCoordinateSpaceUpdated();
     }
 
+    void OnApplicationQuit()
+    {
+        isQuitting = true;
+    }
+
     private async void KeepCoordinateSpaceUpdated()
     {
         while (true)
         {
+#if UNITY_2022_1_OR_NEWER
+            // This is a preferred method for handling async cancelation, but this
+            // token is not provided by the system until Untiy 2022
             if (destroyCancellationToken.IsCancellationRequested)
                 return;
+#else
+            if (isQuitting) return;
+#endif
 
             try
             {
@@ -44,7 +54,8 @@ public class PlutoCoordinateSpace : MonoBehaviour
 
                 await Task.Delay(1000);
             }
-            catch (ApiException e)
+            // Can add catch parameter with type ApiException here
+            catch
             {
                 await Task.Delay(10000);
             }
